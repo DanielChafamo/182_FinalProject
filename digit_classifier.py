@@ -4,9 +4,9 @@ from naive_bayes import NaiveBayes
 with gzip.open('data/mnist.pkl.gz', 'rb') as f:
     train_set, valid_set, test_set = cPickle.load(f)
 
-num_train = 500
-num_test = 500
-alpha = .1
+num_train = 10000
+num_test = 1000
+alpha = 0.01
 
 train_data, train_labels = train_set[0][:num_train], train_set[1][:num_train]
 test_data, test_labels = test_set[0][:num_test], test_set[1][:num_test]

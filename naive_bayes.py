@@ -32,16 +32,17 @@ class NaiveBayes(object):
         else:
             self.gaussian_fit(counts)
 
+    def predict(self, feature_values):
+        joint = list()
+        for _class in range(self.num_classes):
+            total = 0
+            for j, feature_value in enumerate(feature_values):
+                if feature_value > .5:
+                    total += self.params[_class][j]
+            joint.append(total)
+        return min(range(len(joint)), key=lambda a: joint[a])
+
     def test(self, data, labels):
-        predicted = list()
-        for feature_values in data:
-            joint = list()
-            for _class in range(self.num_classes):
-                total = 0
-                for j, feature_value in enumerate(feature_values):
-                    if feature_value > .5:
-                        total += self.params[_class][j]
-                joint.append(total)
-            predicted.append(min(range(len(joint)), key=lambda a: joint[a]))
+        predicted = [self.predict(feature_values) for feature_values in data]
         accuracy = float(sum(predicted == labels)) / len(predicted)
         return predicted, accuracy
