@@ -1,48 +1,76 @@
 import numpy as np
+from scipy.stats import norm
 
 
 class NaiveBayes(object):
-    def __init__(self, num_classes, num_features, model_dist):
-        self.num_classes = num_classes
+    def __init__(self, num_features, num_classes):
         self.num_features = num_features
-        self.model_dist = model_dist  # fitting distribution, m=multinomial, g=gaussian
-        self.alpha = 0.01  # strength of prior
-        self.prior = np.zeros(num_classes)  # belief distribution before data
-        self.params = np.zeros([num_classes, num_features])  # -log( P( feature_value = 1 | Class = class) )
+        self.num_classes = num_classes
+        self.optimal_alpha = 0.01  # strength of prior
+        self.prior = np.ones(num_classes)/num_classes  # belief distribution before data
 
-    def multinomial_fit(self, counts, alpha):
-        for label, features in enumerate(counts):
-            self.params[label] = -np.log((features + alpha)/sum(features + alpha))
-
-    def gaussian_fit(self, counts):
+    def fit(self, counts, alpha):
         pass
 
-    def train(self, data, labels, alpha):
-        counts = np.zeros([self.num_classes, self.num_features])
-        for feature_values, label in zip(data, labels):
-            self.prior[label] += 1
-            for idx, feature_value in enumerate(feature_values):
-                if feature_value > 0.5:
-                    counts[label][idx] += 1
+    def conditional_p(self, _class, feature, feature_value):
+        pass
 
-        self.prior/sum(self.prior)  # normalize count to get prior over classes
-
-        if self.model_dist == 'm':
-            self.multinomial_fit(counts, alpha)
-        else:
-            self.gaussian_fit(counts)
+    def train(self, data, labels, alpha=.1):
+        class_data = dict()
+        for _class in range(self.num_classes):
+            class_data[_class] = data[labels == _class]
+            self.prior[_class] = float(len(class_data[_class])) / len(data)
+        self.fit(class_data, alpha)
 
     def predict(self, feature_values):
-        joint = list()
+        joint = -np.log(self.prior)
         for _class in range(self.num_classes):
-            total = 0
-            for j, feature_value in enumerate(feature_values):
-                if feature_value > .5:
-                    total += self.params[_class][j]
-            joint.append(total)
+            for feature, feature_value in enumerate(feature_values):
+                joint[_class] += self.conditional_p(_class, feature, feature_value)
         return min(range(len(joint)), key=lambda a: joint[a])
 
-    def test(self, data, labels):
-        predicted = [self.predict(feature_values) for feature_values in data]
-        accuracy = float(sum(predicted == labels)) / len(predicted)
-        return predicted, accuracy
+    def tune_alpha(self):
+        raise NotImplementedError
+
+
+class MultinomialNaiveBayes(NaiveBayes):
+    def __init__(self, num_features, num_classes):
+        super(MultinomialNaiveBayes, self).__init__(num_features, num_classes)
+        self.params = np.zeros([num_classes, num_features])
+
+    def set_model(self, params):
+        self.params = params
+
+    def conditional_p(self, _class, feature, feature_value):
+        if feature_value > .5:
+            return self.params[_class][feature]
+        return 0.
+
+    def fit(self, class_data, alpha):
+        for _class, data in class_data.iteritems():
+            data[data < 0.5] = 0.
+            data[data >= 0.5] = 1.
+            counts = np.array(map(sum, data.T)) + alpha
+            self.params[_class] = -np.log(counts / sum(counts))
+
+
+class GaussianNaiveBayes(NaiveBayes):
+    def __init__(self, num_features, num_classes):
+        super(GaussianNaiveBayes, self).__init__(num_features, num_classes)
+        self.means = np.zeros([self.num_classes, self.num_features])
+        self.stdvs = np.zeros([self.num_classes, self.num_features])
+
+    def set_model(self, means, stdvs):
+        self.means = means
+        self.stdvs = stdvs
+
+    def conditional_p(self, _class, feature, feature_value):
+        return -norm.logpdf(feature_value, self.means[_class, feature], self.stdvs[_class, feature])
+
+    def fit(self, class_data, alpha):
+        for _class, _data in class_data.iteritems():
+            self.means[_class] = np.mean(_data, axis=0)
+            self.stdvs[_class] = np.var(_data, axis=0) + alpha
+
+
+

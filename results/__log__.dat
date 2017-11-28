@@ -1,0 +1,4 @@
+        data       test       alpha     episodes   accuracy
+ova    50,000     10,000      1e-5       2,000      90.57
+ova    50,000     10,000      1e-5       2,000      87.42
+ova    5,000      1,000       2e-4       100        84.2
