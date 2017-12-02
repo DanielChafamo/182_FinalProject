@@ -1,6 +1,11 @@
 import numpy as np
 
 
+def softmax(log):
+    raw = np.exp(log - np.max(log))
+    return raw / np.sum(raw, axis=0)
+
+
 def to_one_hot(labels, num_classes):
     one_hot = np.zeros([len(labels), num_classes])
     one_hot[range(len(one_hot)), labels] = 1
@@ -31,3 +36,7 @@ def ReLU_derivative(x):
 
 def accuracy(predictions, true):
     return np.mean(true == predictions)
+
+
+def normalize(raw):
+    return raw / np.sum(raw, axis=0)

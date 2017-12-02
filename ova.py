@@ -25,4 +25,4 @@ class OneVersusAll(object):
         return utils.sigmoid(np.dot(inputs, self.params))
 
     def predict(self, inputs):
-        return map(utils.from_one_hot, self.forward(inputs))
+        return np.array(map(utils.from_one_hot, self.forward(inputs)))

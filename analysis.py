@@ -8,8 +8,8 @@ class Visualize(object):
 
     def kernels(self, params, cmap='hot'):
         fig = plt.figure()
-        for i in range(1, self.num_classes + 1):
-            ax = fig.add_subplot(2, 5, i)
+        for i in range(1, self.num_classes + 1 - 2):
+            ax = fig.add_subplot(6, 10, i)
             plt.axis('off')
             ax.imshow(params[i - 1].reshape([28, 28]), cmap=plt.get_cmap(cmap))
         plt.tight_layout()
@@ -35,10 +35,10 @@ vis.kernels(mbayes_params)
 
 # _______________ ACCURACY ______________
 model_file = 'gbayes_prediction.npy'
-prediction = np.load('results/predictions/' + model_file)
+prediction2 = np.load('results/predictions/' + model_file)
 true = np.load('results/predictions/true.npy')
 
-acc, tally = vis.accuracy_analysis(prediction, true)
+acc, tally = vis.accuracy_analysis(prediction2, true)
 
 plt.imshow(tally, cmap=plt.get_cmap('Greys'))
 plt.axis('off')
