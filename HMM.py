@@ -2,21 +2,11 @@ import numpy as np
 import utils
 from classifier import Predict
 
-corpus = set()
-with open('data/en_dict.txt') as f:
-    for word in f:
-        if '\'' not in word:
-            corpus.add(word.strip('\r\n'))
-
-char_label_map = dict()
-classes = map(str, range(10)) + map(chr, range(97, 123) + range(65, 91))
-for i, c in zip(range(62), classes):
-    char_label_map[str(c)] = i
-    char_label_map[i] = str(c)
+corpus = utils.get_corpus()
 
 class HMM(object):
     """ classifier provides noisy signal """
-    def __init__(self, state_labels=classes, corpus=corpus, classifier='multinomial_bayes'):
+    def __init__(self, state_labels=utils.classes, corpus=corpus, classifier='multinomial_bayes'):
         self.state_labels = state_labels
         self.num_states = len(self.state_labels)
         self.states = np.array(range(self.num_states))
@@ -34,7 +24,7 @@ class HMM(object):
         prior = np.zeros_like(self.states) + alpha
         for word in corpus:
             for char in word:
-                prior[char_label_map[char]] += 1
+                prior[utils.char_label_map[char]] += 1
         prior = utils.normalize(prior)
         np.save('models/prior.npy', prior)
         return prior
@@ -49,7 +39,7 @@ class HMM(object):
         transitionModel = np.zeros([self.num_states, self.num_states]) + alpha
         for word in corpus:
             for char_1, char_2 in zip(word[:-1], word[1:]):
-                transitionModel[char_label_map[char_2], char_label_map[char_1]] += 1
+                transitionModel[utils.char_label_map[char_2], utils.char_label_map[char_1]] += 1
         transitionModel = utils.normalize(transitionModel)
         np.save('models/transition_model.npy', transitionModel)
         return transitionModel

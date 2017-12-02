@@ -1,23 +1,21 @@
 import numpy as np
 from random import choice
 # import matplotlib.pyplot as plt
+import utils
 from HWR import HandWritingRecognizer
+
 
 HWR = HandWritingRecognizer()
 
-char_label_map = dict()
-classes = map(str, range(10)) + map(chr, range(97, 123) + range(65, 91))
-for i, c in zip(range(62), classes):
-    char_label_map[str(c)] = i
-    char_label_map[i] = str(c)
 
 def word_to_chars_pixels(word):
     chars = np.load('data/chars.npz')
     test_data, test_labels = chars["test_data"], chars["test_labels"]
     chars_pixels = list()
     for char in word:
-        chars_pixels.append(test_data[choice(np.where(test_labels==char_label_map[char])[0])])
+        chars_pixels.append(test_data[choice(np.where(test_labels==utils.char_label_map[char])[0])])
     return chars_pixels
+
 
 def test_word_to_chars_pixels(word='AppLe012'):
     chars_pixels = word_to_chars_pixels(word)
@@ -28,18 +26,46 @@ def test_word_to_chars_pixels(word='AppLe012'):
         ax.imshow(chars_pixels[i].reshape([28,28]), cmap=plt.get_cmap('hot'))
     plt.show()
 
-def test_predict_segmented_word():
-    words = ["apple", "crib" ,"dip", "pot", "tree", "stay", "nightly"]
-    predictions = list()
+
+def hmm_versus_raw(words=utils.get_corpus(), upto=1000):
+    true, raws, hmms = np.array([]), np.array([]), np.array([])
+    count = 0
     for word in words:
-        predictions.append(HWR.predict_segmented_word(word_to_chars_pixels(word)))
-    print('{:^10}{:^10}{:^10}'.format('True', 'Raw', 'HMM'))
+        raw, hmm = HWR.predict_segmented_word(word_to_chars_pixels(word))
+        true, raws, hmms = np.append(hmms, hmm), np.append(raws, raw), np.append(true, word)
+        count += 1
+        if count == upto:
+            break
+    print_TRH(true, raws, hmms)
+    print_accuracies(accuracies(true, raws), accuracies(true, hmms))
+    
+
+def print_TRH(true, raws, hmms):
+    print('{:^20}{:^20}{:^20}'.format('True', 'Raw', 'HMM'))
+    print('-' * 60)
+    for word, raw, hmm in zip(true, raws, hmms):
+        print('{:^20}{:^20}{:^20}'.format(word, raw, hmm))
+
+
+def print_accuracies(raw_acc, hmm_acc):
+    print('{:^10}{:^10}{:^10}'.format('', 'Raw', 'HMM'))
     print('-' * 30)
-    for word, prediction in zip(words, predictions):
-        print('{:^10}{:^10}{:^10}'.format( word, prediction[0], prediction[1]))
+    print('{:^10}{:^10}{:^10}'.format('By word', raw_acc[0], hmm_acc[0]))
+    print('{:^10}{:^10}{:^10}'.format('By char', raw_acc[1], hmm_acc[1]))
+
+
+def accuracies(true, prediction):
+    by_word = sum(prediction == true) / float(len(true))
+    by_char, num_chars = 0., 0.
+    for idx in range(len(true)):
+        by_char += sum(np.array(list(true[idx])) == np.array(list(prediction[idx])))
+        num_chars += len(true[idx])
+    return by_word, by_char / num_chars
+
 
 # test_word_to_chars_pixels()
-test_predict_segmented_word()
+# hmm_versus_raw(["apple", "crib" ,"dip", "pot", "tree", "stay", "nightly"], 7)
+hmm_versus_raw()
 
 
 
