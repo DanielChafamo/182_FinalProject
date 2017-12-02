@@ -19,21 +19,21 @@ class Train(object):
         mbayes = MultinomialNaiveBayes(self.num_features, self.num_classes)
         mbayes.train(self.train_data, self.train_labels, alpha)
         if save:
-            np.save('models/multinomial_bayes.npy', mbayes.params)
+            np.save('models/multinomial_bayes', mbayes.params)
         return mbayes.params
 
     def gaussian_bayes(self, save=False):
         gbayes = GaussianNaiveBayes(self.num_features, self.num_classes)
         gbayes.train(self.train_data, self.train_labels)
         if save:
-            np.save('models/gaussian_bayes.npy', np.array([gbayes.means, gbayes.stdvs]))
+            np.save('models/gaussian_bayes', np.array([gbayes.means, gbayes.stdvs]))
         return gbayes.means, gbayes.stdvs
 
     def one_versus_all(self, episodes, epsilon=0.01, save=False):
         ova = OneVersusAll(self.num_features, self.num_classes, epsilon)
         ova.train(self.train_data, self.train_labels, episodes)
         if save:
-            np.save('models/one_versus_all.npy', ova.params)
+            np.save('models/one_versus_all', ova.params)
         return ova.params
 
 

@@ -16,7 +16,7 @@ def process_img(img_file):
 
 
 char_map = dict()
-classes = range(1, 11) + map(chr, range(65, 91) + range(97, 123))
+classes = range(0, 10) + map(chr, range(65, 91) + range(97, 123))
 for k, v in zip(range(1, 63), classes):
     char_map[k] = v
 
