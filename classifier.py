@@ -1,7 +1,4 @@
-import cPickle
-import gzip
 import numpy as np
-
 from naive_bayes import MultinomialNaiveBayes, GaussianNaiveBayes
 from ova import OneVersusAll
 
@@ -15,7 +12,7 @@ class Train(object):
             train_set = chars['train_data'], np.vectorize(int)(chars['train_labels'])
         self.train_data, self.train_labels = train_set
 
-    def multinomial_bayes(self, alpha=0.01, save=False):
+    def multinomial_bayes(self, alpha=1e-2, save=False):
         mbayes = MultinomialNaiveBayes(self.num_features, self.num_classes)
         mbayes.train(self.train_data, self.train_labels, alpha)
         if save:
@@ -29,9 +26,9 @@ class Train(object):
             np.save('models/gaussian_bayes', np.array([gbayes.means, gbayes.stdvs]))
         return gbayes.means, gbayes.stdvs
 
-    def one_versus_all(self, episodes, epsilon=0.01, save=False):
+    def one_versus_all(self, episodes, epsilon=1e-3, num_batch=100, save=False):
         ova = OneVersusAll(self.num_features, self.num_classes, epsilon)
-        ova.train(self.train_data, self.train_labels, episodes)
+        ova.train(self.train_data, self.train_labels, episodes, num_batch)
         if save:
             np.save('models/one_versus_all', ova.params)
         return ova.params
@@ -66,29 +63,24 @@ class Predict(object):
         prediction = ova.predict(np.atleast_2d(data))
         return prediction
 
+class Tune(object):
+    def __init__(self, num_features=28*28, num_classes=62):
+        self.num_features = num_features
+        self.num_classes = num_classes
 
+     
+
+
+    
 """
-
+from classifier import *
 train = Train()
-train.multinomial_bayes(save=True)
-train.gaussian_bayes(save=True)
-train.one_versus_all(save=True)
+ova = train.one_versus_all(20000, 1e-3, 300)
 
-
-
-
-
-train_set = np.load('data/train_chars.npy')
-train_set = np.array(train_set[0].tolist()) , train_set[1]
-train = Train(train_set=train_set, num_classes=62)
-mbayes_params = train.multinomial_bayes()
-
-test_set = np.load('data/test_chars.npy')
-test_set = np.array(test_set[0].tolist()) , test_set[1]
-predict = Predict(data=test_set[0], num_classes=62)
-prediction = np.array(predict.multinomial_bayes(model=mbayes_params))
-
-sum(prediction)
+predict = Predict()
+chars = np.load('data/chars.npz')
+prediction = predict.one_versus_all(data=chars['test_data'], model=ova)
+sum(prediction==chars['test_labels'])/float(len(prediction))
 
 """
 

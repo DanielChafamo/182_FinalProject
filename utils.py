@@ -55,4 +55,3 @@ def get_corpus():
             if '\'' not in word:
                 corpus.add(word.strip('\r\n'))
     return corpus
-    

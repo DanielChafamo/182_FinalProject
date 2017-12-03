@@ -5,7 +5,7 @@ import utils
 from HWR import HandWritingRecognizer
 
 
-HWR = HandWritingRecognizer()
+HWR = HandWritingRecognizer('one_versus_all')
 
 
 def word_to_chars_pixels(word):
@@ -27,15 +27,13 @@ def test_word_to_chars_pixels(word='AppLe012'):
     plt.show()
 
 
-def hmm_versus_raw(words=utils.get_corpus(), upto=1000):
+def hmm_versus_raw(words=utils.get_corpus(), upto=2000):
     true, raws, hmms = np.array([]), np.array([]), np.array([])
     count = 0
-    for word in words:
+    start = np.random.randint(len(words) - upto)
+    for word in list(words)[start : start + upto]:
         raw, hmm = HWR.predict_segmented_word(word_to_chars_pixels(word))
-        true, raws, hmms = np.append(hmms, hmm), np.append(raws, raw), np.append(true, word)
-        count += 1
-        if count == upto:
-            break
+        hmms, raws, true = np.append(hmms, hmm), np.append(raws, raw), np.append(true, word)
     print_TRH(true, raws, hmms)
     print_accuracies(accuracies(true, raws), accuracies(true, hmms))
     
@@ -48,10 +46,10 @@ def print_TRH(true, raws, hmms):
 
 
 def print_accuracies(raw_acc, hmm_acc):
-    print('{:^10}{:^10}{:^10}'.format('', 'Raw', 'HMM'))
+    print('{:^10}{:^10}{:^10}'.format('', 'Raw[%]', 'HMM[%]'))
     print('-' * 30)
-    print('{:^10}{:^10}{:^10}'.format('By word', raw_acc[0], hmm_acc[0]))
-    print('{:^10}{:^10}{:^10}'.format('By char', raw_acc[1], hmm_acc[1]))
+    print('{:^10}{:^10.2f}{:^10.2f}'.format('By word', raw_acc[0]*100, hmm_acc[0]*100))
+    print('{:^10}{:^10.2f}{:^10.2f}'.format('By char', raw_acc[1]*100, hmm_acc[1]*100))
 
 
 def accuracies(true, prediction):

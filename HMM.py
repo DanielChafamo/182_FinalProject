@@ -15,9 +15,10 @@ class HMM(object):
         self.emission_model = self.get_EM(classifier)
 
     def construct_prior(self, unif=False, alpha=1e-2):
-        """ Prior:
-                prior[state] = P(S_{0} = state)
-            either uniform or gleaned from corpus
+        """ 
+        Prior:
+            prior[state] = P(S_{0} = state)
+        either uniform or gleaned from corpus
         """
         if unif:
             return utils.normalize(np.ones_like(self.states))
@@ -49,17 +50,17 @@ class HMM(object):
         Emission Model:
             P( evidence | state) indexed as: emissionModel[evidence][state]
             P(E_{t} = evid | S_{t} = state)
-        Gleaned from accuracy/crossover rates in test data
+        Gleaned from accuracy/crossover rates in train data
         """
         chars = np.load('data/chars.npz')
-        test_data, test_labels = chars['test_data'], chars['test_labels']
+        train_data, train_labels = chars['train_data'], chars['train_labels']
         emitters = ['multinomial_bayes', 'one_versus_all']
         predict = Predict()
         emissionModels = dict()
         for emitter in emitters:
             EM = np.zeros([self.num_states, self.num_states]) + alpha
-            predictions = predict.__getattribute__(emitter)(test_data)
-            for state, emission in zip(test_labels, predictions):
+            predictions = predict.__getattribute__(emitter)(train_data)
+            for state, emission in zip(train_labels, predictions):
                 EM[emission, state] += 1
             emissionModels[emitter] = utils.normalize(EM)
         np.save('models/emission_model', emissionModels)
