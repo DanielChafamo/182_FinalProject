@@ -10,8 +10,14 @@ class OneVersusAll(object):
         self.params = (2 * params - 1) / np.sqrt(self.num_features)
         self.epsilon = epsilon
 
+    def process_input(self, inputs):
+        inputs[inputs >= 0.5] = 1
+        inputs[inputs < 0.5] = 0
+        return inputs
+
     def train(self, inputs, labels, episodes, num_batch):
         outputs = utils.to_one_hot(labels, self.num_class)
+        inputs = self.process_input(inputs)
         for idx in range(episodes):
             batch = np.random.randint(0, len(inputs), num_batch)
             _input = inputs[batch]
@@ -28,4 +34,4 @@ class OneVersusAll(object):
         return utils.sigmoid(np.dot(inputs, self.params))
 
     def predict(self, inputs):
-        return np.array(map(utils.from_one_hot, self.forward(inputs)))
+        return np.array(map(utils.from_one_hot, self.forward(self.process_input(inputs))))

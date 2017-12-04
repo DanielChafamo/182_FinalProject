@@ -22,7 +22,9 @@ def from_one_hot(one_hot):
     return np.argmax(one_hot)
 
 
-def sigmoid(x):
+def sigmoid(x, deriv=False):
+    if deriv:
+        return sigmoid_output_to_derivative(x)
     return 1 / (1 + np.exp(-x))
 
 
@@ -30,12 +32,14 @@ def sigmoid_output_to_derivative(x):
     return x * (1 - x)
 
 
-def ReLU(x):
+def ReLU(x, deriv=False):
+    if deriv:
+        return ReLU_output_to_derivative(x)
     x[ x < 0 ] = 0
     return x
 
 
-def ReLU_derivative(x):
+def ReLU_output_to_derivative(x):
     x[ x > 0 ] = 1
     return x
 

@@ -75,12 +75,18 @@ class Tune(object):
 """
 from classifier import *
 train = Train()
-ova = train.one_versus_all(20000, 1e-3, 300)
-
 predict = Predict()
 chars = np.load('data/chars.npz')
+
+ova = train.one_versus_all(20000, 1e-3, 150)
 prediction = predict.one_versus_all(data=chars['test_data'], model=ova)
 sum(prediction==chars['test_labels'])/float(len(prediction))
+
+mbayes = train.multinomial_bayes()
+prediction = predict.multinomial_bayes(data=chars['test_data'], model=mbayes)
+sum(prediction==chars['test_labels'])/float(len(prediction))
+
+
 
 """
 
