@@ -68,10 +68,7 @@ class Tune(object):
         self.num_features = num_features
         self.num_classes = num_classes
 
-     
 
-
-    
 """
 from classifier import *
 train = Train()
@@ -83,4 +80,3 @@ prediction = predict.one_versus_all(data=chars['test_data'], model=ova)
 sum(prediction==chars['test_labels'])/float(len(prediction))
 
 """
-
