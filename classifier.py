@@ -68,10 +68,7 @@ class Tune(object):
         self.num_features = num_features
         self.num_classes = num_classes
 
-     
 
-
-    
 """
 from classifier import *
 train = Train()
@@ -89,4 +86,3 @@ sum(prediction==chars['test_labels'])/float(len(prediction))
 
 
 """
-
