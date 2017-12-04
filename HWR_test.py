@@ -5,7 +5,7 @@ import utils
 from HWR import HandWritingRecognizer
 
 
-HWR = HandWritingRecognizer('one_versus_all')
+HWR = HandWritingRecognizer()
 
 
 def word_to_chars_pixels(word):
@@ -27,9 +27,8 @@ def test_word_to_chars_pixels(word='AppLe012'):
     plt.show()
 
 
-def hmm_versus_raw(words=utils.get_corpus(), upto=2000):
+def hmm_versus_raw(words=utils.get_corpus(), upto=1000):
     true, raws, hmms = np.array([]), np.array([]), np.array([])
-    count = 0
     start = np.random.randint(len(words) - upto)
     for word in list(words)[start : start + upto]:
         raw, hmm = HWR.predict_segmented_word(word_to_chars_pixels(word))
@@ -63,7 +62,7 @@ def accuracies(true, prediction):
 
 # test_word_to_chars_pixels()
 # hmm_versus_raw(["apple", "crib" ,"dip", "pot", "tree", "stay", "nightly"], 7)
-hmm_versus_raw()
+hmm_versus_raw(upto=100)
 
 
 
