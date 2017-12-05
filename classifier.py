@@ -1,4 +1,5 @@
 import numpy as np
+import utils
 from naive_bayes import MultinomialNaiveBayes, GaussianNaiveBayes
 from ova import OneVersusAll
 
@@ -8,8 +9,7 @@ class Train(object):
         self.num_features = num_features
         self.num_classes = num_classes
         if train_set is None:
-            chars = np.load('data/chars.npz')
-            train_set = chars['train_data'], np.vectorize(int)(chars['train_labels'])
+            train_set = utils.get_data_set('train')
         self.train_data, self.train_labels = train_set
 
     def multinomial_bayes(self, alpha=1e-2, save=False):
@@ -78,6 +78,9 @@ chars = np.load('data/chars.npz')
 ova = train.one_versus_all(20000, 1e-3, 150)
 prediction = predict.one_versus_all(data=chars['test_data'], model=ova)
 sum(prediction==chars['test_labels'])/float(len(prediction))
+
+63.87
+
 
 mbayes = train.multinomial_bayes()
 prediction = predict.multinomial_bayes(data=chars['test_data'], model=mbayes)

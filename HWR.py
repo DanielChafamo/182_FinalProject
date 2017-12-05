@@ -1,5 +1,6 @@
 import numpy as np
-from HMM import HMM, Inference
+import utils
+from hmm import HMM, Inference
 from classifier import Predict
 
 
@@ -25,10 +26,16 @@ class HandWritingRecognizer(object):
             self.Inference.observe(predicted_char)
             raw.append(self.HMM.state_labels[predicted_char])
             predicted_word.append(np.argmax(self.Inference.get_belief_distribution()))
-        return "".join(raw), "".join([self.HMM.state_labels[state] for state in predicted_word])
+        hmm = "".join([self.HMM.state_labels[state] for state in predicted_word])
+        raw = "".join(raw)
+        nearest = self.get_nearest_neighbour(hmm)
+        return raw, hmm, nearest
 
     def predict_word(self, pixels):
         pass
+
+    def get_nearest_neighbour(self, prediction, dictionary=utils.get_corpus()):
+        return min(dictionary, key=lambda word: utils.get_distance(word, prediction))
 
     def predict_line(self, pixels):
         pass

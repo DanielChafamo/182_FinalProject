@@ -2,7 +2,7 @@ import numpy as np
 
 
 char_label_map = dict()
-classes = map(str, range(10)) + map(chr, range(97, 123) + range(65, 91))
+classes = map(str, range(10)) + map(chr, range(97, 123) +  range(65, 91))
 for i, c in zip(range(62), classes):
     char_label_map[str(c)] = i
     char_label_map[i] = str(c)
@@ -59,3 +59,18 @@ def get_corpus():
             if '\'' not in word:
                 corpus.add(word.strip('\r\n'))
     return corpus
+
+def get_distance(word1, word2):
+    d = abs(len(word1) - len(word2))*10
+    d += len([1 for l1, l2 in zip(word1, word2) if l1 != l2])
+    return d
+
+
+def get_data_set(data='test', nn=False):
+    chars = np.load('data/chars.npz')
+    data, labels = chars[data+'_data'], np.vectorize(int)(chars[data+'_labels'])
+    if nn:
+        labels = to_one_hot(labels).reshape([len(labels, -1, 1)])
+        data = data.reshape([len(data), -1, 1])
+    return data, labels
+

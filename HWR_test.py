@@ -1,11 +1,11 @@
 import numpy as np
 from random import choice
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import utils
-from HWR import HandWritingRecognizer
+from hwr import HandWritingRecognizer
 
 
-HWR = HandWritingRecognizer()
+HWR = HandWritingRecognizer('one_versus_all')
 
 
 def word_to_chars_pixels(word):
@@ -13,7 +13,14 @@ def word_to_chars_pixels(word):
     test_data, test_labels = chars["test_data"], chars["test_labels"]
     chars_pixels = list()
     for char in word:
-        chars_pixels.append(test_data[choice(np.where(test_labels==utils.char_label_map[char])[0])])
+        if char == ' ':
+            chars_pixels.append(np.zeros(28*28))
+            continue
+        if char == 'I':
+            chars_pixels.append(test_data[224])
+            continue
+        ID = choice(np.where(test_labels==utils.char_label_map[char])[0])
+        chars_pixels.append(test_data[ID])
     return chars_pixels
 
 
@@ -23,32 +30,35 @@ def test_word_to_chars_pixels(word='AppLe012'):
     num_chars = len(chars_pixels)
     for i in range(num_chars):
         ax = fig.add_subplot(1, num_chars, i+1)
-        ax.imshow(chars_pixels[i].reshape([28,28]), cmap=plt.get_cmap('hot'))
+        ax.imshow(chars_pixels[i].reshape([28,28]), cmap=plt.get_cmap('Greys'))
+        ax.axis('off')
+    plt.subplots_adjust(wspace=0, hspace=0)
     plt.show()
 
 
-def hmm_versus_raw(words=utils.get_corpus(), upto=1000):
-    true, raws, hmms = np.array([]), np.array([]), np.array([])
-    start = np.random.randint(len(words) - upto)
+def hmm_versus_raw(words=utils.get_corpus(), start=None, upto=1000):
+    true, raws, hmms, finals = np.array([]), np.array([]), np.array([]), np.array([])
+    if start is None:
+        start = np.random.randint(len(words) - upto)
     for word in list(words)[start : start + upto]:
-        raw, hmm = HWR.predict_segmented_word(word_to_chars_pixels(word))
-        hmms, raws, true = np.append(hmms, hmm), np.append(raws, raw), np.append(true, word)
-    print_TRH(true, raws, hmms)
-    print_accuracies(accuracies(true, raws), accuracies(true, hmms))
+        raw, hmm, final = HWR.predict_segmented_word(word_to_chars_pixels(word))
+        finals, hmms, raws, true = np.append(finals, final),np.append(hmms, hmm), np.append(raws, raw), np.append(true, word)
+    print_TRH(true, raws, hmms, finals)
+    print_accuracies(accuracies(true, raws), accuracies(true, hmms), accuracies(true, finals))
     
 
-def print_TRH(true, raws, hmms):
-    print('{:^20}{:^20}{:^20}'.format('True', 'Raw', 'HMM'))
-    print('-' * 60)
-    for word, raw, hmm in zip(true, raws, hmms):
-        print('{:^20}{:^20}{:^20}'.format(word, raw, hmm))
+def print_TRH(true, raws, hmms, finals):
+    print('{:^20}{:^20}{:^20}{:^20}'.format('True', 'Raw', 'HMM', 'Final'))
+    print('-' * 80)
+    for word, raw, hmm, final in zip(true, raws, hmms, finals):
+        print('{:^20}{:^20}{:^20}{:^20}'.format(word, raw, hmm, final))
 
 
-def print_accuracies(raw_acc, hmm_acc):
-    print('{:^10}{:^10}{:^10}'.format('', 'Raw[%]', 'HMM[%]'))
+def print_accuracies(raw_acc, hmm_acc, final_acc):
+    print('{:^10}{:^10}{:^10}{:^10}'.format('', 'Raw[%]', 'HMM[%]', 'Final[%]'))
     print('-' * 30)
-    print('{:^10}{:^10.2f}{:^10.2f}'.format('By word', raw_acc[0]*100, hmm_acc[0]*100))
-    print('{:^10}{:^10.2f}{:^10.2f}'.format('By char', raw_acc[1]*100, hmm_acc[1]*100))
+    print('{:^10}{:^10.2f}{:^10.2f}{:^10.2f}'.format('By word', raw_acc[0]*100, hmm_acc[0]*100, final_acc[0]*100))
+    print('{:^10}{:^10.2f}{:^10.2f}{:^10.2f}'.format('By char', raw_acc[1]*100, hmm_acc[1]*100, final_acc[1]*100))
 
 
 def accuracies(true, prediction):
@@ -60,9 +70,19 @@ def accuracies(true, prediction):
     return by_word, by_char / num_chars
 
 
-# test_word_to_chars_pixels()
-# hmm_versus_raw(["apple", "crib" ,"dip", "pot", "tree", "stay", "nightly"], 7)
+# test_word_to_chars_pixels('INSOMNIA BOVINE WOODCRAFT LINGUINI')
+# word_to_chars_pixels('i')
 hmm_versus_raw(upto=100)
+# hmm_versus_raw(['under', 'the', 'spreading', 'chesnut', 'tree', 'i', 'sold', 'you', 'and', 'you', 'sold', 'me'], 0, 12)
 
+"""
+data = pd.DataFrame({'acc':np.array([59.03, 60.83, 63.87, 80.67, 78.34, 81.5, 93.93, 92.01, 93.28]), 'classifier': np.array(3*['multinomial naiveBayes','gaussian  naiveBayes','one versus all']),'hmm':3*['wthout HMM']+3*['with HMM']+3*['with HMM + dictionary']})
+
+sns.set(style='darkgrid')
+g=sns.factorplot(x="classifier", y="acc", hue="hmm",data=data,size=6)
+g.set_ylabels("accuracy[%]")
+g.set_xlabels("")
+
+"""
 
 
