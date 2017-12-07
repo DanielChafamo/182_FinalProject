@@ -5,8 +5,7 @@ import utils
 from hwr import HandWritingRecognizer
 
 
-HWR = HandWritingRecognizer('one_versus_all')
-
+HWR = HandWritingRecognizer()
 
 def word_to_chars_pixels(word):
     chars = np.load('data/chars.npz')
@@ -15,10 +14,7 @@ def word_to_chars_pixels(word):
     for char in word:
         if char == ' ':
             chars_pixels.append(np.zeros(28*28))
-            continue
-        if char == 'I':
-            chars_pixels.append(test_data[224])
-            continue
+            continue 
         ID = choice(np.where(test_labels==utils.char_label_map[char])[0])
         chars_pixels.append(test_data[ID])
     return chars_pixels
@@ -34,6 +30,15 @@ def test_word_to_chars_pixels(word='AppLe012'):
         ax.axis('off')
     plt.subplots_adjust(wspace=0, hspace=0)
     plt.show()
+
+
+def accuracies(true, prediction):
+    by_word = sum(prediction == true) / float(len(true))
+    by_char, num_chars = 0., 0.
+    for idx in range(len(true)):
+        by_char += sum(np.array(list(true[idx])) == np.array(list(prediction[idx])))
+        num_chars += len(true[idx])
+    return by_word, by_char / num_chars
 
 
 def hmm_versus_raw(words=utils.get_corpus(), start=None, upto=1000):
@@ -61,28 +66,7 @@ def print_accuracies(raw_acc, hmm_acc, final_acc):
     print('{:^10}{:^10.2f}{:^10.2f}{:^10.2f}'.format('By char', raw_acc[1]*100, hmm_acc[1]*100, final_acc[1]*100))
 
 
-def accuracies(true, prediction):
-    by_word = sum(prediction == true) / float(len(true))
-    by_char, num_chars = 0., 0.
-    for idx in range(len(true)):
-        by_char += sum(np.array(list(true[idx])) == np.array(list(prediction[idx])))
-        num_chars += len(true[idx])
-    return by_word, by_char / num_chars
-
-
-# test_word_to_chars_pixels('INSOMNIA BOVINE WOODCRAFT LINGUINI')
-# word_to_chars_pixels('i')
-hmm_versus_raw(upto=100)
-# hmm_versus_raw(['under', 'the', 'spreading', 'chesnut', 'tree', 'i', 'sold', 'you', 'and', 'you', 'sold', 'me'], 0, 12)
-
-"""
-data = pd.DataFrame({'acc':np.array([59.03, 60.83, 63.87, 80.67, 78.34, 81.5, 93.93, 92.01, 93.28]), 'classifier': np.array(3*['multinomial naiveBayes','gaussian  naiveBayes','one versus all']),'hmm':3*['wthout HMM']+3*['with HMM']+3*['with HMM + dictionary']})
-
-sns.set(style='darkgrid')
-g=sns.factorplot(x="classifier", y="acc", hue="hmm",data=data,size=6)
-g.set_ylabels("accuracy[%]")
-g.set_xlabels("")
-
-"""
-
+# test_word_to_chars_pixels('handwriting')
+# hmm_versus_raw(['under', 'the', 'spreading', 'chesnut', 'tree',], 0, 2)
+# hmm_versus_raw(upto=1000)
 
