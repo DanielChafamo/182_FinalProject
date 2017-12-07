@@ -47,6 +47,15 @@ class HandWritingRecognizer(object):
         resize = lambda arr: np.asarray(Image.fromarray(arr).resize([28,28], Image.ANTIALIAS))
         return map(np.ravel, map(resize, np.split(image, xedges, axis=1)))
 
+    def neg_likelihood(self, image, coords, num_chars):
+        """
+        estimate negative loglikelihood of sequence generated assuming 
+        \num_chars\ characters being a true character sequence
+        """
+        chars_pixels = self.cluster_segment(image, coords, num_chars)
+        char_likelihoods = map(self.predict.is_character_probability, chars_pixels)
+        return np.mean(char_likelihoods)
+
     def predict_word(self, img_file='samples/hand.png'):
         """
         raw unsegmented pixels of single word
@@ -59,14 +68,4 @@ class HandWritingRecognizer(object):
 
     def predict_line(self, pixels):
         pass
-
-    def neg_likelihood(self, image, coords, num_chars):
-        """
-        estimate negative loglikelihood of sequence generated assuming 
-        \num_chars\ characters being a true character sequence
-        """
-        chars_pixels = self.cluster_segment(image, coords, num_chars)
-        char_likelihoods = map(self.predict.is_character_probability, chars_pixels)
-        return np.mean(char_likelihoods)
-
 

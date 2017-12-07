@@ -68,5 +68,5 @@ def print_accuracies(raw_acc, hmm_acc, final_acc):
 
 # test_word_to_chars_pixels('handwriting')
 # hmm_versus_raw(['under', 'the', 'spreading', 'chesnut', 'tree',], 0, 2)
-# hmm_versus_raw(upto=1000)
+hmm_versus_raw(upto=1000)
 
