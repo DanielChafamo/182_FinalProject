@@ -10,24 +10,32 @@ class NaiveBayes(object):
         self.prior = np.ones(num_classes)/num_classes  # belief distribution before data
 
     def fit(self, counts, alpha):
-        pass
+        raise NotImplementedError
 
     def conditional_p(self, _class, feature, feature_value):
-        pass
+        raise NotImplementedError
 
     def train(self, data, labels, alpha=.1):
+        """
+        parse by label and feed to fit
+        """
         class_data = dict()
         for _class in range(self.num_classes):
             class_data[_class] = data[labels == _class]
             self.prior[_class] = float(len(class_data[_class])) / len(data)
         self.fit(class_data, alpha)
 
-    def predict(self, feature_values):
+    def predict(self, feature_values, score=False):
+        """
+        returns class with minimum log likelihood given feature values
+        """
         joint = -np.log(self.prior)
         for _class in range(self.num_classes):
             for feature, feature_value in enumerate(feature_values):
                 joint[_class] += self.conditional_p(_class, feature, feature_value)
-        return min(range(len(joint)), key=lambda a: joint[a])
+        minimized = min(range(len(joint)), key=lambda a: joint[a])
+        if score: return joint[minimized]
+        return minimized
 
     def tune_alpha(self):
         raise NotImplementedError
@@ -42,11 +50,13 @@ class MultinomialNaiveBayes(NaiveBayes):
         self.params = params
 
     def conditional_p(self, _class, feature, feature_value):
-        if feature_value > .5:
-            return self.params[_class][feature]
+        if feature_value > .5: return self.params[_class][feature]
         return 0.
 
     def fit(self, class_data, alpha):
+        """
+        generates multinomial distribution parameters for P(feature_value | class) 
+        """
         for _class, data in class_data.iteritems():
             data[data < 0.5] = 0.
             data[data >= 0.5] = 1.
@@ -68,9 +78,9 @@ class GaussianNaiveBayes(NaiveBayes):
         return -norm.logpdf(feature_value, self.means[_class, feature], self.stdvs[_class, feature])
 
     def fit(self, class_data, alpha):
+        """
+        generates multivariate normal distribution parameters for P(feature_value | class) 
+        """
         for _class, _data in class_data.iteritems():
             self.means[_class] = np.mean(_data, axis=0)
             self.stdvs[_class] = np.var(_data, axis=0) + alpha
-
-
-
