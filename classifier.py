@@ -77,6 +77,7 @@ from classifier import *
 train = Train()
 predict = Predict()
 chars = np.load('data/chars.npz')
+big = np.load('data/big.npz')
 
 # -----------------------------------------------------------------------------
 
