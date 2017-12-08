@@ -37,10 +37,17 @@ class NaiveBayes(object):
         if score: return joint[minimized]
         return minimized
 
-    def tune_alpha(self, validation_set):
+    def tune_alpha(self, train_set, validation_set):
         optimal_alpha = 1e-1
-        for alpha in range(optimal_alpha):
-            pass
+        max_accuracy = 0.
+        for alpha in range(0, 1, 0.001):
+            self.train(*train_set, alpha)
+            prediction = np.array(map(self.predict, validation_set[0]))
+            accuracy = np.mean(validation_set[1] == prediction)
+            if accuracy > max_accuracy:
+                optimal_alpha = alpha
+                max_accuracy = accuracy
+        return optimal_alpha
 
 
 class MultinomialNaiveBayes(NaiveBayes):
