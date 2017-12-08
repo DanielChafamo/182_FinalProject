@@ -8,11 +8,6 @@ for i, c in zip(range(62), classes):
     char_label_map[i] = str(c)
 
 
-def softmax(log):
-    raw = np.exp(log - np.max(log))
-    return raw / np.sum(raw, axis=0)
-
-
 def to_one_hot(labels, num_classes):
     one_hot = np.zeros([len(labels), num_classes])
     one_hot[range(len(one_hot)), labels] = 1
@@ -34,8 +29,6 @@ def sigmoid_output_to_derivative(x):
 
 
 def ReLU(x, deriv=False):
-    if deriv:
-        return ReLU_output_to_derivative(x)
     x[ x < 0 ] = 0
     return x
 
@@ -59,6 +52,9 @@ def get_corpus():
         for word in f:
             if '\'' not in word:
                 corpus.add(word.strip('\r\n'))
+    full_up_corpus = map(lambda w: w.upper(), corpus)
+    first_up_corpus = map(lambda w: w[0].upper() + w[1:], corpus)
+    corpus = list(corpus) + full_up_corpus + first_up_corpus
     return corpus
 
 
@@ -68,11 +64,7 @@ def distance(word1, word2):
     return d
 
 
-def get_data_set(data='test', source='chars', nn=False):
+def get_data_set(data='test', source='chars'):
     chars = np.load('data/' + source +'.npz')
-    data, labels = chars[data+'_data'], np.vectorize(int)(chars[data+'_labels'])
-    if nn:
-        labels = to_one_hot(labels).reshape([len(labels, -1, 1)])
-        data = data.reshape([len(data), -1, 1])
-    return data, labels
+    return chars[data+'_data'], np.vectorize(int)(chars[data+'_labels'])
 

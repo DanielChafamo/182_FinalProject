@@ -15,7 +15,7 @@ class NaiveBayes(object):
     def conditional_p(self, _class, feature, feature_value):
         raise NotImplementedError
 
-    def train(self, data, labels, alpha=.1):
+    def train(self, data, labels, alpha=.01):
         """
         parse by label and feed to fit
         """
@@ -37,8 +37,10 @@ class NaiveBayes(object):
         if score: return joint[minimized]
         return minimized
 
-    def tune_alpha(self):
-        raise NotImplementedError
+    def tune_alpha(self, validation_set):
+        optimal_alpha = 1e-1
+        for alpha in range(optimal_alpha):
+            pass
 
 
 class MultinomialNaiveBayes(NaiveBayes):

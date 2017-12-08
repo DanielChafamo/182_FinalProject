@@ -41,13 +41,16 @@ def accuracies(true, prediction):
     return by_word, by_char / num_chars
 
 
-def hmm_versus_raw(words=utils.get_corpus(), start=None, upto=1000):
+def hmm_versus_raw(words=utils.get_corpus(), size=1000):
     true, raws, hmms, finals = np.array([]), np.array([]), np.array([]), np.array([])
-    if start is None:
-        start = np.random.randint(len(words) - upto)
-    for word in list(words)[start : start + upto]:
+    idx = np.random.randint(0, len(words), size)
+    for i in idx:
+        word = list(words)[i]
         raw, hmm, final = HWR.predict_segmented_word(word_to_chars_pixels(word))
-        finals, hmms, raws, true = np.append(finals, final),np.append(hmms, hmm), np.append(raws, raw), np.append(true, word)
+        finals = np.append(finals, final)  
+        hmms = np.append(hmms, hmm) 
+        raws = np.append(raws, raw)
+        true = np.append(true, word)
     print_TRH(true, raws, hmms, finals)
     print_accuracies(accuracies(true, raws), accuracies(true, hmms), accuracies(true, finals))
     
@@ -62,11 +65,13 @@ def print_TRH(true, raws, hmms, finals):
 def print_accuracies(raw_acc, hmm_acc, final_acc):
     print('{:^10}{:^10}{:^10}{:^10}'.format('', 'Raw[%]', 'HMM[%]', 'Final[%]'))
     print('-' * 30)
-    print('{:^10}{:^10.2f}{:^10.2f}{:^10.2f}'.format('By word', raw_acc[0]*100, hmm_acc[0]*100, final_acc[0]*100))
-    print('{:^10}{:^10.2f}{:^10.2f}{:^10.2f}'.format('By char', raw_acc[1]*100, hmm_acc[1]*100, final_acc[1]*100))
+    print('{:^10}{:^10.2f}{:^10.2f}{:^10.2f}'
+          .format('By word', raw_acc[0]*100, hmm_acc[0]*100, final_acc[0]*100))
+    print('{:^10}{:^10.2f}{:^10.2f}{:^10.2f}'
+          .format('By char', raw_acc[1]*100, hmm_acc[1]*100, final_acc[1]*100))
 
 
 # test_word_to_chars_pixels('handwriting')
-# hmm_versus_raw(['under', 'the', 'spreading', 'chesnut', 'tree',], 0, 2)
-hmm_versus_raw(upto=1000)
+# hmm_versus_raw(['under', 'the', 'spreading', 'chesnut', 'tree',], 2)
+hmm_versus_raw(size=10)
 

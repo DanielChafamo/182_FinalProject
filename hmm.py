@@ -1,6 +1,7 @@
 import numpy as np
 import utils
 from classifier import Predict
+import operator 
 
 corpus = utils.get_corpus()
 
@@ -116,4 +117,22 @@ class Inference(object):
 
     def get_belief_distribution(self):
         return self.beliefs
+    
+    def viterbi(self, emissions):
+        # init
+        viterbi = np.zeros([self.HMM.num_states, len(emissions)])
+        best = np.zeros([self.HMM.num_states, len(emissions)])
+        viterbi[:,0] = self.HMM.prior.T * self.HMM.emission_model[emissions[0]]
+        # recur
+        for t in range(1, len(emissions)):
+            for s in range (0, self.HMM.num_states): 
+                paths = viterbi[:,t-1] * self.HMM.transition_model[s] * self.HMM.emission_model[emissions[t], s]
+                viterbi[s, t], best[s, t] = max(paths), np.argmax(paths)
+        # backtrack
+        most_likely = np.zeros_like(emissions)
+        most_likely[-1] =  viterbi[:,-1].argmax() 
+        for t in range(len(emissions) - 1, 0, -1): 
+            most_likely[t-1] = best[most_likely[t], t]
+        return most_likely
 
+    
