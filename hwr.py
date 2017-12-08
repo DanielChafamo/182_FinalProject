@@ -54,7 +54,7 @@ class HandWritingRecognizer(object):
         resize = lambda arr: np.asarray(Image.fromarray(arr).resize([28,28], Image.ANTIALIAS))
         return map(np.ravel, map(resize, np.split(image, xedges, axis=1)))
 
-    def predict_segmented_word(self, chars_pixels, method='predict_by_viterbi'):
+    def predict_segmented_word(self, chars_pixels, method='predict_by_inference'):
         """
         chars_pixels[n] = [784, 1] array of the n_th character 
         returns predictions using classifier only, classifier + hmm and 
@@ -108,10 +108,6 @@ class HandWritingRecognizer(object):
     def predict_line(self, pixels):
         pass
 
-    def neg_prob(self, data):
-        neg = self.predict.is_character_probability(data)
-        # print(": ", neg)
-        return neg
 
 """
 hwr = HandWritingRecognizer()
