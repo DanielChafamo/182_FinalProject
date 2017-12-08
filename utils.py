@@ -52,9 +52,9 @@ def get_corpus():
         for word in f:
             if '\'' not in word:
                 corpus.add(word.strip('\r\n'))
-    full_up_corpus = map(lambda w: w.upper(), corpus)
-    first_up_corpus = map(lambda w: w[0].upper() + w[1:], corpus)
-    corpus = list(corpus) + full_up_corpus + first_up_corpus
+    # full_up_corpus = map(lambda w: w.upper(), corpus)
+    # first_up_corpus = map(lambda w: w[0].upper() + w[1:], corpus)
+    # corpus = list(corpus) + full_up_corpus + first_up_corpus
     return corpus
 
 

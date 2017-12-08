@@ -56,14 +56,14 @@ def hmm_versus_raw(words=utils.get_corpus(), size=1000):
     
 
 def print_TRH(true, raws, hmms, finals):
-    print('{:^20}{:^20}{:^20}{:^20}'.format('True', 'Raw', 'HMM', 'Final'))
+    print('{:^20}{:^20}{:^20}{:^20}'.format('True', 'Raw', 'HMM', 'HMM + lookup'))
     print('-' * 80)
     for word, raw, hmm, final in zip(true, raws, hmms, finals):
         print('{:^20}{:^20}{:^20}{:^20}'.format(word, raw, hmm, final))
 
 
 def print_accuracies(raw_acc, hmm_acc, final_acc):
-    print('{:^10}{:^10}{:^10}{:^10}'.format('', 'Raw[%]', 'HMM[%]', 'Final[%]'))
+    print('{:^10}{:^10}{:^10}{:^10}'.format('', 'Raw[%]', 'HMM[%]', 'HMM + lookup[%]'))
     print('-' * 30)
     print('{:^10}{:^10.2f}{:^10.2f}{:^10.2f}'
           .format('By word', raw_acc[0]*100, hmm_acc[0]*100, final_acc[0]*100))
