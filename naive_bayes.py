@@ -41,7 +41,7 @@ class NaiveBayes(object):
         optimal_alpha = 1e-1
         max_accuracy = 0.
         for alpha in range(0, 1, 0.001):
-            self.train(*train_set, alpha)
+            self.train(*train_set, alpha=alpha)
             prediction = np.array(map(self.predict, validation_set[0]))
             accuracy = np.mean(validation_set[1] == prediction)
             if accuracy > max_accuracy:
